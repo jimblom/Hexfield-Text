@@ -1,0 +1,67 @@
+{
+  "name": "hexfield-text",
+  "displayName": "Hexfield Text",
+  "description": "Inline syntax colorization for Hexfield Deck planner files in VS Code",
+  "version": "0.1.0",
+  "publisher": "jimblom",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jimblom/hexfield-text.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jimblom/hexfield-text/issues"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["markdown", "kanban", "hexfield", "task board", "syntax highlighting"],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "hexfield-markdown",
+        "aliases": ["Hexfield Markdown", "hexfield-markdown"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "hexfield-markdown",
+        "scopeName": "text.hexfield.markdown",
+        "path": "./syntaxes/hexfield-deck.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.html": "html",
+          "meta.embedded.block.javascript": "javascript",
+          "meta.embedded.block.css": "css"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node esbuild.js --production",
+    "watch": "node esbuild.js --watch",
+    "package": "vsce package --no-dependencies",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/vsce": "^2.0.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "volta": {
+    "node": "20.11.0"
+  }
+}
