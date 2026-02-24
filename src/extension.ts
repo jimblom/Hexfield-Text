@@ -48,10 +48,7 @@ async function promoteIfHexfield(
     return;
   }
   try {
-    const promoted = await vscode.languages.setTextDocumentLanguage(
-      document,
-      HEXFIELD_LANGUAGE_ID,
-    );
+    const promoted = await vscode.languages.setTextDocumentLanguage(document, HEXFIELD_LANGUAGE_ID);
     // Apply decorations immediately after promotion so dates are colored on first open.
     const editor = vscode.window.visibleTextEditors.find((e) => e.document === promoted);
     if (editor) {
