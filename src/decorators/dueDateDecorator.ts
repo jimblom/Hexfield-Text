@@ -23,9 +23,9 @@ type Proximity = 'overdue' | 'today' | 'soon' | 'future';
 /** Colors mirror Hexfield Deck board badge colors exactly. */
 const PROXIMITY_COLORS: Record<Proximity, string> = {
   overdue: '#F44747', // Red
-  today: '#CE9178',   // Orange
-  soon: '#CCA700',    // Yellow
-  future: '#858585',  // Gray
+  today: '#CE9178', // Orange
+  soon: '#CCA700', // Yellow
+  future: '#858585', // Gray
 };
 
 /**
