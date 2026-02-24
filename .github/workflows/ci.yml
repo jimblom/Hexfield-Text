@@ -14,7 +14,7 @@ jobs:
     name: Lint · type-check · build · package
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write   # write needed to commit pnpm-lock.yaml on first bootstrap run
 
     steps:
       - name: Checkout
@@ -29,10 +29,38 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.11.0'
-          cache: 'pnpm'
+          # No cache: 'pnpm' here — that requires pnpm-lock.yaml to already exist.
+          # We cache the pnpm store directly below, which works with or without a lockfile.
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install
+
+      # On the first push after bootstrapping there is no lockfile in the repo.
+      # pnpm install generates one; this step commits it back so future runs get
+      # a fully deterministic, cacheable install. github-actions[bot] commits do
+      # not re-trigger CI, so there is no infinite loop.
+      - name: Commit lockfile if newly generated
+        if: github.event_name == 'push'
+        run: |
+          if ! git ls-files --error-unmatch pnpm-lock.yaml > /dev/null 2>&1; then
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "github-actions[bot]"
+            git add pnpm-lock.yaml
+            git commit -m "chore: commit generated pnpm-lock.yaml"
+            git push
+          fi
 
       - name: Check formatting
         run: pnpm format:check
