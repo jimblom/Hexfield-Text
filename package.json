@@ -47,8 +47,10 @@
     "build": "node esbuild.js --production",
     "watch": "node esbuild.js --watch",
     "package": "vsce package --no-dependencies",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
   },
   "devDependencies": {
     "@types/vscode": "^1.75.0",
