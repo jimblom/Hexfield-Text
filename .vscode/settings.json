@@ -1,0 +1,47 @@
+{
+    // Editor
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+
+    // Files
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/*.tsbuildinfo": true
+    },
+
+    // TypeScript
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+
+    // Search
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/pnpm-lock.yaml": true
+    },
+
+    // Hexfield Text — token color defaults for development
+    // These ensure grammar scopes render correctly regardless of active theme.
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            { "scope": "entity.name.tag.hexfield",                  "settings": { "foreground": "#569CD6" } },
+            { "scope": "string.quoted.hexfield.date",               "settings": { "foreground": "#858585" } },
+            { "scope": "keyword.operator.hexfield.priority.high",   "settings": { "foreground": "#F44747" } },
+            { "scope": "keyword.operator.hexfield.priority.medium", "settings": { "foreground": "#CCA700" } },
+            { "scope": "keyword.operator.hexfield.priority.low",    "settings": { "foreground": "#89D185" } },
+            { "scope": "constant.numeric.hexfield.estimate",        "settings": { "foreground": "#4EC9B0" } },
+            { "scope": "markup.changed.hexfield.checkbox",          "settings": { "foreground": "#CE9178" } },
+            { "scope": "keyword.other.hexfield.frontmatter",        "settings": { "foreground": "#C586C0" } }
+        ]
+    }
+}

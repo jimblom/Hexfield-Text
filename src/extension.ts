@@ -130,6 +130,21 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
   );
+
+  // Rebuild decoration types and re-decorate when the user changes due date color settings.
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (!event.affectsConfiguration('hexfield-text.colors')) {
+        return;
+      }
+      decorator.refreshColors();
+      for (const editor of vscode.window.visibleTextEditors) {
+        if (editor.document.languageId === HEXFIELD_LANGUAGE_ID) {
+          decorator.decorate(editor);
+        }
+      }
+    }),
+  );
 }
 
 export function deactivate(): void {
