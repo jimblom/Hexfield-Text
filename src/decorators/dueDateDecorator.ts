@@ -29,7 +29,13 @@ import * as vscode from 'vscode';
 // Static token types
 // ---------------------------------------------------------------------------
 
-type StaticToken = 'projectTag' | 'priorityHigh' | 'priorityMed' | 'priorityLow' | 'estimate' | 'inProgressCheckbox';
+type StaticToken =
+  | 'projectTag'
+  | 'priorityHigh'
+  | 'priorityMed'
+  | 'priorityLow'
+  | 'estimate'
+  | 'inProgressCheckbox';
 
 const STATIC_DEFAULTS: Record<StaticToken, string> = {
   projectTag: '#569CD6', // Blue
@@ -133,7 +139,9 @@ function createStaticTypes(): Record<StaticToken, vscode.TextEditorDecorationTyp
   });
 
   // All other static tokens — foreground color only.
-  for (const token of Object.keys(STATIC_DEFAULTS).filter((k) => k !== 'projectTag') as StaticToken[]) {
+  for (const token of Object.keys(STATIC_DEFAULTS).filter(
+    (k) => k !== 'projectTag',
+  ) as StaticToken[]) {
     result[token] = vscode.window.createTextEditorDecorationType({
       color: readConfig(cfg, STATIC_CONFIG_KEYS[token], STATIC_DEFAULTS[token]),
     });
@@ -194,10 +202,12 @@ export class DueDateDecorator implements vscode.Disposable {
       re.lastIndex = 0;
       let m: RegExpExecArray | null;
       while ((m = re.exec(text)) !== null) {
-        staticRanges[token].push(new vscode.Range(
-          editor.document.positionAt(m.index),
-          editor.document.positionAt(m.index + m[0].length),
-        ));
+        staticRanges[token].push(
+          new vscode.Range(
+            editor.document.positionAt(m.index),
+            editor.document.positionAt(m.index + m[0].length),
+          ),
+        );
       }
       editor.setDecorations(this.staticTypes[token], staticRanges[token]);
     }
@@ -211,10 +221,12 @@ export class DueDateDecorator implements vscode.Disposable {
     let m: RegExpExecArray | null;
     while ((m = DATE_BRACKET_RE.exec(text)) !== null) {
       const prox = getProximity(m[1]);
-      proximityRanges[prox].push(new vscode.Range(
-        editor.document.positionAt(m.index),
-        editor.document.positionAt(m.index + m[0].length),
-      ));
+      proximityRanges[prox].push(
+        new vscode.Range(
+          editor.document.positionAt(m.index),
+          editor.document.positionAt(m.index + m[0].length),
+        ),
+      );
     }
     for (const prox of Object.keys(proximityRanges) as Proximity[]) {
       editor.setDecorations(this.proximityTypes[prox], proximityRanges[prox]);
