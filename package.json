@@ -2,7 +2,7 @@
   "name": "hexfield-text",
   "displayName": "Hexfield Text",
   "description": "Inline syntax colorization for Hexfield Deck planner files in VS Code",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "publisher": "jimblom",
   "license": "MIT",
   "repository": {
@@ -15,8 +15,16 @@
   "engines": {
     "vscode": "^1.75.0"
   },
-  "categories": ["Other"],
-  "keywords": ["markdown", "kanban", "hexfield", "task board", "syntax highlighting"],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "kanban",
+    "hexfield",
+    "task board",
+    "syntax highlighting"
+  ],
   "activationEvents": [
     "onLanguage:markdown",
     "onLanguage:hexfield-markdown",
@@ -27,7 +35,10 @@
     "languages": [
       {
         "id": "hexfield-markdown",
-        "aliases": ["Hexfield Markdown", "hexfield-markdown"],
+        "aliases": [
+          "Hexfield Markdown",
+          "hexfield-markdown"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -45,7 +56,9 @@
       {
         "scopeName": "hexfield.markdown.inline",
         "path": "./syntaxes/hexfield-inline-injection.tmLanguage.json",
-        "injectTo": ["text.hexfield.markdown"]
+        "injectTo": [
+          "text.hexfield.markdown"
+        ]
       }
     ],
     "configuration": {
