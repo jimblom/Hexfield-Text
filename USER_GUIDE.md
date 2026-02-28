@@ -280,7 +280,13 @@ This should not happen with correct usage. If it does:
 
 ---
 
-## Related
+## The Hexfield Ecosystem
 
-- [Hexfield Deck](https://github.com/jimblom/Hexfield-Deck) — The companion kanban board extension
-- [Hexfield Deck User Guide](https://github.com/jimblom/Hexfield-Deck/blob/main/USER_GUIDE.md) — Full planner file format reference
+Hexfield Text is one component in a family of tools built around the Hexfield planner file format. Components share a configuration namespace (`hexfield.colors.*`, `hexfield-deck.projects.*`) and are independently installable — each works without the others present.
+
+| Component | Role |
+|---|---|
+| **[Hexfield Deck](https://github.com/jimblom/Hexfield-Deck)** | Kanban board view of your planner file |
+| **Hexfield Text** | Inline colorization in the markdown editor |
+
+See the [Hexfield Deck User Guide](https://github.com/jimblom/Hexfield-Deck/blob/main/USER_GUIDE.md) for the complete planner file format reference.

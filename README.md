@@ -116,11 +116,38 @@ See the [Hexfield Deck User Guide](https://github.com/jimblom/Hexfield-Deck/blob
 
 ---
 
+## 🛰️ The Hexfield Ecosystem
+
+Hexfield Text is one component in a growing family of tools built around the Hexfield planner file format. Each component does one thing and composes cleanly with the others — no hard dependencies, no mandatory install order.
+
+### The connective tissue
+
+Every Hexfield component is anchored to the same two things:
+
+**The file format** — a plain markdown file with `type: hexfield-planner` in its YAML frontmatter. That single field is what identifies a Hexfield file. Any component can detect it, none of them own it.
+
+**The shared configuration namespace** — `hexfield.colors.*` for token colors, `hexfield-deck.projects.*` for per-project settings. Components contribute to and read from the same VS Code settings keys. Configure colors once; every installed component responds.
+
+### Current components
+
+| Component | What it does |
+|---|---|
+| **[Hexfield Deck](https://github.com/jimblom/Hexfield-Deck)** | Kanban board view — renders your planner file as a visual task board with card drag-and-drop, project filtering, and badge coloring |
+| **Hexfield Text** _(this extension)_ | Editor view — colorizes planner metadata inline so the source file reflects the same visual language as the board |
+
+### Design principles
+
+- **Independently installable.** Each component works without the others present. Hexfield Text colorizes tags even if Hexfield Deck isn't installed; it just uses the default color.
+- **Loosely coupled.** Components communicate through shared VS Code settings, not direct APIs or shared code. A new component can join the ecosystem by reading the same config keys.
+- **Same file, different views.** A planner file is just a markdown file. Every component is a different lens on the same data — board view, editor view, and whatever comes next.
+
+---
+
 ## 🎬 About the Name
 
-**Hexfield Text** is part of the Hexfield product family, named after the **Hexfield Viewscreen** on the Satellite of Love from _Mystery Science Theater 3000_ — the ship's iconic hexagonal display and communication screen.
+Hexfield is named after the **Hexfield Viewscreen** on the Satellite of Love from _Mystery Science Theater 3000_ — the ship's iconic hexagonal display and communication screen. Each component is a different panel on that display.
 
-**Hexfield Deck** is the board view. **Hexfield Text** is the editor layer of the same interface — the source-level view of your planner data, brought to visual life.
+**Hexfield Deck** is the board. **Hexfield Text** is the editor. The Satellite of Love runs on more than one screen.
 
 ---
 
