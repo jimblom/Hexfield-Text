@@ -191,16 +191,16 @@ All token colors are applied by the Decoration API and are fully user-configurab
 
 | Setting | Default | Token |
 |---|---|---|
-| `hexfield-text.colors.projectTag` | `#569CD6` | `#project-tag` |
-| `hexfield-text.colors.priorityHigh` | `#F44747` | `!!!` |
-| `hexfield-text.colors.priorityMed` | `#CCA700` | `!!` |
-| `hexfield-text.colors.priorityLow` | `#89D185` | `!` |
-| `hexfield-text.colors.timeEstimate` | `#4EC9B0` | `est:2h` / `est:30m` |
-| `hexfield-text.colors.inProgressCheckbox` | `#CE9178` | `[/]` |
-| `hexfield-text.colors.dueDateOverdue` | `#F44747` | `[YYYY-MM-DD]` — overdue |
-| `hexfield-text.colors.dueDateToday` | `#CE9178` | `[YYYY-MM-DD]` — today |
-| `hexfield-text.colors.dueDateSoon` | `#CCA700` | `[YYYY-MM-DD]` — within 3 days |
-| `hexfield-text.colors.dueDateFuture` | `#858585` | `[YYYY-MM-DD]` — future |
+| `hexfield.colors.projectTag` | `#569CD6` | `#project-tag` |
+| `hexfield.colors.priorityHigh` | `#F44747` | `!!!` |
+| `hexfield.colors.priorityMed` | `#CCA700` | `!!` |
+| `hexfield.colors.priorityLow` | `#89D185` | `!` |
+| `hexfield.colors.timeEstimate` | `#4EC9B0` | `est:2h` / `est:30m` |
+| `hexfield.colors.inProgressCheckbox` | `#CE9178` | `[/]` |
+| `hexfield.colors.dueDateOverdue` | `#F44747` | `[YYYY-MM-DD]` — overdue |
+| `hexfield.colors.dueDateToday` | `#CE9178` | `[YYYY-MM-DD]` — today |
+| `hexfield.colors.dueDateSoon` | `#CCA700` | `[YYYY-MM-DD]` — within 3 days |
+| `hexfield.colors.dueDateFuture` | `#858585` | `[YYYY-MM-DD]` — future |
 
 All colors override the active VS Code theme — they match the Hexfield Deck board palette exactly. Changes take effect immediately with no reload needed.
 

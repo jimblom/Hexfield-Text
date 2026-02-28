@@ -4,6 +4,14 @@ All notable changes to Hexfield Text are documented here. Dates are in `YYYY-MM-
 
 ---
 
+## [1.0.1] — 2026-02-27
+
+### Changed
+
+- **Breaking:** color settings migrated from `hexfield-text.colors.*` to the shared `hexfield.colors.*` namespace. If you have customized colors, rename the keys in your `settings.json` (e.g. `hexfield-text.colors.projectTag` → `hexfield.colors.projectTag`). This aligns with Hexfield Deck's upcoming adoption of the same namespace so both extensions share one settings group.
+
+---
+
 ## [1.0.0] — 2026-02-27
 
 ### Added

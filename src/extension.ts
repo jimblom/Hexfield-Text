@@ -134,7 +134,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // Rebuild decoration types and re-decorate when the user changes due date color settings.
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (!event.affectsConfiguration('hexfield-text.colors')) {
+      if (!event.affectsConfiguration('hexfield.colors')) {
         return;
       }
       decorator.refreshColors();

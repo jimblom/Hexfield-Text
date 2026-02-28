@@ -49,54 +49,54 @@
       }
     ],
     "configuration": {
-      "title": "Hexfield Text",
+      "title": "Hexfield",
       "properties": {
-        "hexfield-text.colors.projectTag": {
+        "hexfield.colors.projectTag": {
           "type": "string",
           "default": "#569CD6",
           "markdownDescription": "Foreground color for project tags (`#hexfield`, `#deep13`, etc.)."
         },
-        "hexfield-text.colors.priorityHigh": {
+        "hexfield.colors.priorityHigh": {
           "type": "string",
           "default": "#F44747",
           "markdownDescription": "Foreground color for HIGH priority markers (`!!!`)."
         },
-        "hexfield-text.colors.priorityMed": {
+        "hexfield.colors.priorityMed": {
           "type": "string",
           "default": "#CCA700",
           "markdownDescription": "Foreground color for MED priority markers (`!!`)."
         },
-        "hexfield-text.colors.priorityLow": {
+        "hexfield.colors.priorityLow": {
           "type": "string",
           "default": "#89D185",
           "markdownDescription": "Foreground color for LOW priority markers (`!`)."
         },
-        "hexfield-text.colors.timeEstimate": {
+        "hexfield.colors.timeEstimate": {
           "type": "string",
           "default": "#4EC9B0",
           "markdownDescription": "Foreground color for time estimates (`est:2h`, `est:30m`)."
         },
-        "hexfield-text.colors.inProgressCheckbox": {
+        "hexfield.colors.inProgressCheckbox": {
           "type": "string",
           "default": "#CE9178",
           "markdownDescription": "Foreground color for in-progress checkboxes (`[/]`)."
         },
-        "hexfield-text.colors.dueDateOverdue": {
+        "hexfield.colors.dueDateOverdue": {
           "type": "string",
           "default": "#F44747",
           "markdownDescription": "Foreground color for **overdue** due dates (date < today). Accepts any CSS color string (e.g. `#F44747`, `rgb(244,71,71)`)."
         },
-        "hexfield-text.colors.dueDateToday": {
+        "hexfield.colors.dueDateToday": {
           "type": "string",
           "default": "#CE9178",
           "markdownDescription": "Foreground color for due dates that fall **today**."
         },
-        "hexfield-text.colors.dueDateSoon": {
+        "hexfield.colors.dueDateSoon": {
           "type": "string",
           "default": "#CCA700",
           "markdownDescription": "Foreground color for due dates **within the next 3 days**."
         },
-        "hexfield-text.colors.dueDateFuture": {
+        "hexfield.colors.dueDateFuture": {
           "type": "string",
           "default": "#858585",
           "markdownDescription": "Foreground color for due dates **more than 3 days** in the future."

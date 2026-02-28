@@ -121,7 +121,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 function createStaticTypes(): Record<StaticToken, vscode.TextEditorDecorationType> {
-  const cfg = 'hexfield-text.colors';
+  const cfg = 'hexfield.colors';
 
   // Project tag gets pill styling: colored foreground, semi-transparent tinted
   // background, rounded border. before/after thin spaces add visual padding.
@@ -151,7 +151,7 @@ function createStaticTypes(): Record<StaticToken, vscode.TextEditorDecorationTyp
 }
 
 function createProximityTypes(): Record<Proximity, vscode.TextEditorDecorationType> {
-  const cfg = 'hexfield-text.colors';
+  const cfg = 'hexfield.colors';
   const result = {} as Record<Proximity, vscode.TextEditorDecorationType>;
   for (const prox of Object.keys(PROXIMITY_DEFAULTS) as Proximity[]) {
     result[prox] = vscode.window.createTextEditorDecorationType({
