@@ -3,7 +3,8 @@
 // Handles two categories of tokens:
 //
 // STATIC tokens — fixed color regardless of context:
-//   Project tag   #project        → Blue   (#569CD6)
+//   Project tag   #project        → Blue   (#569CD6) by default; overridden
+//                                   per-project by hexfield-deck.projects config
 //   Priority HIGH !!!             → Red    (#F44747)
 //   Priority MED  !!              → Yellow (#CCA700)
 //   Priority LOW  !               → Green  (#89D185)
@@ -19,6 +20,10 @@
 //
 // Using the Decoration API for all tokens ensures colors are absolute and
 // not overridden by the active VS Code theme.
+//
+// Per-project tag colors are read from the hexfield-deck.projects configuration
+// (shared with Hexfield Deck). Each unique project color gets its own cached
+// TextEditorDecorationType; types are lazily created and disposed on refresh.
 //
 // All TextEditorDecorationType instances are disposed on deactivation or
 // when colors are refreshed from configuration.
@@ -100,6 +105,24 @@ function getProximity(dateStr: string): Proximity {
 }
 
 // ---------------------------------------------------------------------------
+// Per-project config (shared with Hexfield Deck)
+// ---------------------------------------------------------------------------
+
+interface ProjectConfig {
+  color?: string;
+  url?: string;
+  style?: 'border' | 'fill' | 'both';
+}
+
+function getProjectsConfig(): Record<string, ProjectConfig> {
+  return (
+    vscode.workspace
+      .getConfiguration('hexfield-deck')
+      .get<Record<string, ProjectConfig>>('projects') ?? {}
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -118,6 +141,15 @@ function hexToRgba(hex: string, alpha: number): string {
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** Creates a pill-border decoration type for a given project color. */
+function createProjectDecorationType(color: string): vscode.TextEditorDecorationType {
+  return vscode.window.createTextEditorDecorationType({
+    color,
+    borderRadius: '4px',
+    border: `1px solid ${hexToRgba(color, 0.4)}`,
+  });
 }
 
 function createStaticTypes(): Record<StaticToken, vscode.TextEditorDecorationType> {
@@ -170,22 +202,27 @@ function createProximityTypes(): Record<Proximity, vscode.TextEditorDecorationTy
  * Implements vscode.Disposable so all decoration types are cleaned up on
  * deactivation or color refresh.
  *
- * Call `refreshColors()` after a `hexfield-text.colors` configuration change,
- * then re-decorate any visible editors.
+ * Call `refreshColors()` after a `hexfield.colors` configuration change.
+ * Call `decorate()` after either `hexfield.colors` or `hexfield-deck.projects`
+ * changes so per-project tag colors update immediately.
  */
 export class DueDateDecorator implements vscode.Disposable {
   private staticTypes: Record<StaticToken, vscode.TextEditorDecorationType>;
   private proximityTypes: Record<Proximity, vscode.TextEditorDecorationType>;
+  /** Decoration types keyed by project color — lazily created, disposed on refresh. */
+  private projectTypes = new Map<string, vscode.TextEditorDecorationType>();
 
   constructor() {
     this.staticTypes = createStaticTypes();
     this.proximityTypes = createProximityTypes();
   }
 
-  /** Rebuild all decoration types from current configuration. */
+  /** Rebuild static/proximity decoration types from current hexfield.colors config. */
   refreshColors(): void {
     for (const t of Object.values(this.staticTypes)) t.dispose();
     for (const t of Object.values(this.proximityTypes)) t.dispose();
+    for (const t of this.projectTypes.values()) t.dispose();
+    this.projectTypes.clear();
     this.staticTypes = createStaticTypes();
     this.proximityTypes = createProximityTypes();
   }
@@ -194,22 +231,60 @@ export class DueDateDecorator implements vscode.Disposable {
   decorate(editor: vscode.TextEditor): void {
     const text = editor.document.getText();
 
-    // --- Static tokens ---
-    const staticRanges = {} as Record<StaticToken, vscode.Range[]>;
-    for (const token of Object.keys(STATIC_PATTERNS) as StaticToken[]) {
-      staticRanges[token] = [];
+    // --- Static tokens (all except projectTag, which is handled below) ---
+    for (const token of (Object.keys(STATIC_PATTERNS) as StaticToken[]).filter(
+      (k) => k !== 'projectTag',
+    )) {
+      const ranges: vscode.Range[] = [];
       const re = STATIC_PATTERNS[token];
       re.lastIndex = 0;
       let m: RegExpExecArray | null;
       while ((m = re.exec(text)) !== null) {
-        staticRanges[token].push(
+        ranges.push(
           new vscode.Range(
             editor.document.positionAt(m.index),
             editor.document.positionAt(m.index + m[0].length),
           ),
         );
       }
-      editor.setDecorations(this.staticTypes[token], staticRanges[token]);
+      editor.setDecorations(this.staticTypes[token], ranges);
+    }
+
+    // --- Project tags ---
+    // Tags with a color in hexfield-deck.projects get a per-project pill border.
+    // Tags without a config entry fall back to the default projectTag decoration.
+    const projectsConfig = getProjectsConfig();
+    const defaultTagRanges: vscode.Range[] = [];
+    const colorBuckets = new Map<string, vscode.Range[]>();
+
+    const tagRe = STATIC_PATTERNS.projectTag;
+    tagRe.lastIndex = 0;
+    let tm: RegExpExecArray | null;
+    while ((tm = tagRe.exec(text)) !== null) {
+      const name = tm[0].slice(1); // strip leading #
+      const color = projectsConfig[name]?.color;
+      const range = new vscode.Range(
+        editor.document.positionAt(tm.index),
+        editor.document.positionAt(tm.index + tm[0].length),
+      );
+      if (color) {
+        if (!colorBuckets.has(color)) colorBuckets.set(color, []);
+        colorBuckets.get(color)!.push(range);
+      } else {
+        defaultTagRanges.push(range);
+      }
+    }
+
+    // Clear all cached project decorations before re-applying (handles color changes).
+    for (const type of this.projectTypes.values()) {
+      editor.setDecorations(type, []);
+    }
+    editor.setDecorations(this.staticTypes.projectTag, defaultTagRanges);
+    for (const [color, ranges] of colorBuckets) {
+      if (!this.projectTypes.has(color)) {
+        this.projectTypes.set(color, createProjectDecorationType(color));
+      }
+      editor.setDecorations(this.projectTypes.get(color)!, ranges);
     }
 
     // --- Due date proximity tokens ---
@@ -236,5 +311,6 @@ export class DueDateDecorator implements vscode.Disposable {
   dispose(): void {
     for (const t of Object.values(this.staticTypes)) t.dispose();
     for (const t of Object.values(this.proximityTypes)) t.dispose();
+    for (const t of this.projectTypes.values()) t.dispose();
   }
 }

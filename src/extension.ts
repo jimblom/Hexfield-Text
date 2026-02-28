@@ -131,13 +131,19 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
   );
 
-  // Rebuild decoration types and re-decorate when the user changes due date color settings.
+  // Rebuild decoration types and re-decorate when color or project config changes.
+  // hexfield.colors changes require a full refreshColors() to rebuild static types.
+  // hexfield-deck.projects changes only need a re-decorate to apply new tag colors.
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (!event.affectsConfiguration('hexfield.colors')) {
+      const colorsChanged = event.affectsConfiguration('hexfield.colors');
+      const projectsChanged = event.affectsConfiguration('hexfield-deck.projects');
+      if (!colorsChanged && !projectsChanged) {
         return;
       }
-      decorator.refreshColors();
+      if (colorsChanged) {
+        decorator.refreshColors();
+      }
       for (const editor of vscode.window.visibleTextEditors) {
         if (editor.document.languageId === HEXFIELD_LANGUAGE_ID) {
           decorator.decorate(editor);
