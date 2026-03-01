@@ -187,27 +187,34 @@ Due date brackets (`[YYYY-MM-DD]`) are colorized by the Decoration API at runtim
 
 ## Configuration
 
-> Token color configuration is planned for v1.0.0 (Phase 3). The settings listed here describe the intended behavior.
+All token colors are applied by the Decoration API and are fully user-configurable. In VS Code Settings (`Ctrl+,`), search for **hexfield-text** to access:
 
-In VS Code Settings (`Ctrl+,`), search for **hexfield-text** to access:
+| Setting | Default | Token |
+|---|---|---|
+| `hexfield.colors.projectTag` | `#569CD6` | `#project-tag` |
+| `hexfield.colors.priorityHigh` | `#F44747` | `!!!` |
+| `hexfield.colors.priorityMed` | `#CCA700` | `!!` |
+| `hexfield.colors.priorityLow` | `#89D185` | `!` |
+| `hexfield.colors.timeEstimate` | `#4EC9B0` | `est:2h` / `est:30m` |
+| `hexfield.colors.inProgressCheckbox` | `#CE9178` | `[/]` |
+| `hexfield.colors.dueDateOverdue` | `#F44747` | `[YYYY-MM-DD]` — overdue |
+| `hexfield.colors.dueDateToday` | `#CE9178` | `[YYYY-MM-DD]` — today |
+| `hexfield.colors.dueDateSoon` | `#CCA700` | `[YYYY-MM-DD]` — within 3 days |
+| `hexfield.colors.dueDateFuture` | `#858585` | `[YYYY-MM-DD]` — future |
+
+All colors override the active VS Code theme — they match the Hexfield Deck board palette exactly. Changes take effect immediately with no reload needed.
+
+### Frontmatter Key Colors
+
+Frontmatter keys (`type`, `week`, `year`, etc.) are colored by the TextMate grammar and follow your active theme. To override them, add to your `settings.json`:
 
 ```json
-{
-  "hexfield-text.colors.projectTag": "#569CD6",
-  "hexfield-text.colors.priorityHigh": "#F44747",
-  "hexfield-text.colors.priorityMed": "#CCA700",
-  "hexfield-text.colors.priorityLow": "#89D185",
-  "hexfield-text.colors.timeEstimate": "#4EC9B0",
-  "hexfield-text.colors.inProgressCheckbox": "#CE9178",
-  "hexfield-text.colors.frontmatterKey": "#C586C0",
-  "hexfield-text.colors.dueDateOverdue": "#F44747",
-  "hexfield-text.colors.dueDateToday": "#CE9178",
-  "hexfield-text.colors.dueDateSoon": "#CCA700",
-  "hexfield-text.colors.dueDateFuture": "#858585"
+"editor.tokenColorCustomizations": {
+  "textMateRules": [
+    { "scope": "keyword.other.hexfield.frontmatter", "settings": { "foreground": "#C586C0" } }
+  ]
 }
 ```
-
-All settings have defaults matching the values in the Token Reference above. Any setting left unset uses the default.
 
 ---
 
@@ -273,7 +280,13 @@ This should not happen with correct usage. If it does:
 
 ---
 
-## Related
+## The Hexfield Ecosystem
 
-- [Hexfield Deck](https://github.com/jimblom/Hexfield-Deck) — The companion kanban board extension
-- [Hexfield Deck User Guide](https://github.com/jimblom/Hexfield-Deck/blob/main/USER_GUIDE.md) — Full planner file format reference
+Hexfield Text is one component in a family of tools built around the Hexfield planner file format. Components share a configuration namespace (`hexfield.colors.*`, `hexfield-deck.projects.*`) and are independently installable — each works without the others present.
+
+| Component | Role |
+|---|---|
+| **[Hexfield Deck](https://github.com/jimblom/Hexfield-Deck)** | Kanban board view of your planner file |
+| **Hexfield Text** | Inline colorization in the markdown editor |
+
+See the [Hexfield Deck User Guide](https://github.com/jimblom/Hexfield-Deck/blob/main/USER_GUIDE.md) for the complete planner file format reference.

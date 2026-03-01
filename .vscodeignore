@@ -1,0 +1,14 @@
+.vscode/**
+src/**
+node_modules/**
+examples/**
+.eslintrc.json
+.prettierrc
+tsconfig.json
+esbuild.js
+pnpm-lock.yaml
+*.map
+.gitignore
+**/*.ts
+!dist/**
+IMPLEMENTATION_PLAN.md

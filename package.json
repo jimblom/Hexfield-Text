@@ -1,0 +1,143 @@
+{
+  "name": "hexfield-text",
+  "displayName": "Hexfield Text",
+  "description": "Inline syntax colorization for Hexfield Deck planner files in VS Code",
+  "version": "1.0.0",
+  "publisher": "jimblom",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jimblom/hexfield-text.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jimblom/hexfield-text/issues"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "kanban",
+    "hexfield",
+    "task board",
+    "syntax highlighting"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onLanguage:hexfield-markdown",
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "hexfield-markdown",
+        "aliases": [
+          "Hexfield Markdown",
+          "hexfield-markdown"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "hexfield-markdown",
+        "scopeName": "text.hexfield.markdown",
+        "path": "./syntaxes/hexfield-deck.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.html": "html",
+          "meta.embedded.block.javascript": "javascript",
+          "meta.embedded.block.css": "css"
+        }
+      },
+      {
+        "scopeName": "hexfield.markdown.inline",
+        "path": "./syntaxes/hexfield-inline-injection.tmLanguage.json",
+        "injectTo": [
+          "text.hexfield.markdown"
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "Hexfield",
+      "properties": {
+        "hexfield.colors.projectTag": {
+          "type": "string",
+          "default": "#569CD6",
+          "markdownDescription": "Foreground color for project tags (`#hexfield`, `#deep13`, etc.)."
+        },
+        "hexfield.colors.priorityHigh": {
+          "type": "string",
+          "default": "#F44747",
+          "markdownDescription": "Foreground color for HIGH priority markers (`!!!`)."
+        },
+        "hexfield.colors.priorityMed": {
+          "type": "string",
+          "default": "#CCA700",
+          "markdownDescription": "Foreground color for MED priority markers (`!!`)."
+        },
+        "hexfield.colors.priorityLow": {
+          "type": "string",
+          "default": "#89D185",
+          "markdownDescription": "Foreground color for LOW priority markers (`!`)."
+        },
+        "hexfield.colors.timeEstimate": {
+          "type": "string",
+          "default": "#4EC9B0",
+          "markdownDescription": "Foreground color for time estimates (`est:2h`, `est:30m`)."
+        },
+        "hexfield.colors.inProgressCheckbox": {
+          "type": "string",
+          "default": "#CE9178",
+          "markdownDescription": "Foreground color for in-progress checkboxes (`[/]`)."
+        },
+        "hexfield.colors.dueDateOverdue": {
+          "type": "string",
+          "default": "#F44747",
+          "markdownDescription": "Foreground color for **overdue** due dates (date < today). Accepts any CSS color string (e.g. `#F44747`, `rgb(244,71,71)`)."
+        },
+        "hexfield.colors.dueDateToday": {
+          "type": "string",
+          "default": "#CE9178",
+          "markdownDescription": "Foreground color for due dates that fall **today**."
+        },
+        "hexfield.colors.dueDateSoon": {
+          "type": "string",
+          "default": "#CCA700",
+          "markdownDescription": "Foreground color for due dates **within the next 3 days**."
+        },
+        "hexfield.colors.dueDateFuture": {
+          "type": "string",
+          "default": "#858585",
+          "markdownDescription": "Foreground color for due dates **more than 3 days** in the future."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js --production",
+    "watch": "node esbuild.js --watch",
+    "package": "vsce package --no-dependencies",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/vsce": "^2.0.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "volta": {
+    "node": "20.11.0"
+  }
+}
