@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Hexfield Markdown",
+  "scopeName": "text.hexfield.markdown",
+  "patterns": [
+    { "include": "#frontmatter" },
+    { "include": "text.html.markdown" }
+  ],
+  "repository": {
+    "frontmatter": {
+      "name": "meta.frontmatter.hexfield",
+      "begin": "\\A(---)",
+      "end": "^(---|\\.\\.\\.)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.yaml" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.tag.yaml" }
+      },
+      "patterns": [
+        {
+          "comment": "Recognized Hexfield Deck frontmatter keys",
+          "match": "^(type|week|year|quarter|tags|startDate|endDate)(?=\\s*:)",
+          "captures": {
+            "1": { "name": "keyword.other.hexfield.frontmatter" }
+          }
+        }
+      ]
+    }
+  }
+}
