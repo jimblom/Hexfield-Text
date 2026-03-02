@@ -4,7 +4,7 @@ All notable changes to Hexfield Text are documented here. Dates are in `YYYY-MM-
 
 ---
 
-## [1.0.0] — 2026-02-28
+## [0.1.0] — 2026-03-01
 
 Initial public release.
 
@@ -38,17 +38,3 @@ Initial public release.
 
 - Published to VS Code Marketplace as `jimblom.hexfield-text`.
 
----
-
-## Development milestones (pre-release)
-
-### [0.2.0] — 2026-02-24
-
-- Decoration API for dynamic due date proximity coloring
-- Debounced re-decoration (500ms) on document change
-- Language de-promotion when frontmatter field is removed
-
-### [0.1.0] — 2026-02-23
-
-- Extension scaffold, language promotion logic, TextMate grammar
-- Zero false-positive colorization on regular markdown files
