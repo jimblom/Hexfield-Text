@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Hexfield Inline",
+  "scopeName": "hexfield.markdown.inline",
+  "injectionSelector": "L:text.hexfield.markdown - (meta.frontmatter.hexfield)",
+  "patterns": [
+    { "include": "#in-progress-checkbox" },
+    { "include": "#due-date" },
+    { "include": "#estimate" },
+    { "include": "#priority-high" },
+    { "include": "#priority-med" },
+    { "include": "#priority-low" },
+    { "include": "#project-tag" }
+  ],
+  "repository": {
+    "in-progress-checkbox": {
+      "comment": "In-progress checkbox [/] — orange",
+      "match": "\\[/\\]",
+      "name": "markup.changed.hexfield.checkbox"
+    },
+    "due-date": {
+      "comment": "ISO date bracket [YYYY-MM-DD] — default gray; overridden by Decoration API",
+      "match": "\\[\\d{4}-\\d{2}-\\d{2}\\]",
+      "name": "string.quoted.hexfield.date"
+    },
+    "estimate": {
+      "comment": "Time estimate est:Xh or est:Xm (fractional supported) — teal",
+      "match": "\\best:\\d+(?:\\.\\d+)?[hm]\\b",
+      "name": "constant.numeric.hexfield.estimate"
+    },
+    "priority-high": {
+      "comment": "Priority HIGH !!! — red",
+      "match": "(?<!!)!!!(?!!)",
+      "name": "keyword.operator.hexfield.priority.high"
+    },
+    "priority-med": {
+      "comment": "Priority MED !! — yellow",
+      "match": "(?<!!)!!(?!!)",
+      "name": "keyword.operator.hexfield.priority.medium"
+    },
+    "priority-low": {
+      "comment": "Priority LOW ! — green; only matches standalone ! not preceded/followed by !",
+      "match": "(?<!!)!(?!!)",
+      "name": "keyword.operator.hexfield.priority.low"
+    },
+    "project-tag": {
+      "comment": "Project tag #word — blue; # must be preceded by whitespace or start-of-line",
+      "match": "(?<!\\S)#[a-zA-Z][a-zA-Z0-9_-]*",
+      "name": "entity.name.tag.hexfield"
+    }
+  }
+}
