@@ -102,16 +102,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Re-evaluate language ID and re-apply decorations when document content changes.
   context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument((event) => {
+    vscode.workspace.onDidChangeTextDocument(async (event) => {
       const { document } = event;
       if (document.languageId === MARKDOWN_LANGUAGE_ID) {
         promoteIfHexfield(document, decorator);
       } else if (document.languageId === HEXFIELD_LANGUAGE_ID) {
-        demoteIfNotHexfield(document);
+        await demoteIfNotHexfield(document);
         const editor = vscode.window.visibleTextEditors.find((e) => e.document === document);
         if (editor) {
           clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => decorator.decorate(editor), 500);
+          if (document.languageId !== HEXFIELD_LANGUAGE_ID) {
+            // Demotion occurred — clear all decorations so no Hexfield colors linger.
+            decorator.clear(editor);
+          } else {
+            debounceTimer = setTimeout(() => decorator.decorate(editor), 500);
+          }
         }
       }
     }),

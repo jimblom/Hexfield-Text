@@ -308,6 +308,13 @@ export class DueDateDecorator implements vscode.Disposable {
     }
   }
 
+  /** Remove all Hexfield decorations from the editor (called on demotion to plain markdown). */
+  clear(editor: vscode.TextEditor): void {
+    for (const t of Object.values(this.staticTypes)) editor.setDecorations(t, []);
+    for (const t of Object.values(this.proximityTypes)) editor.setDecorations(t, []);
+    for (const t of this.projectTypes.values()) editor.setDecorations(t, []);
+  }
+
   dispose(): void {
     for (const t of Object.values(this.staticTypes)) t.dispose();
     for (const t of Object.values(this.proximityTypes)) t.dispose();
