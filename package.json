@@ -32,6 +32,36 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "hexfield.insertDate",
+        "title": "Hexfield: Insert Date",
+        "category": "Hexfield"
+      },
+      {
+        "command": "hexfield.jumpToToday",
+        "title": "Hexfield: Jump to Today",
+        "category": "Hexfield"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "hexfield.insertDate",
+          "when": "editorLangId == hexfield-markdown"
+        },
+        {
+          "command": "hexfield.jumpToToday",
+          "when": "editorLangId == hexfield-markdown"
+        }
+      ]
+    },
+    "snippets": [
+      {
+        "language": "hexfield-markdown",
+        "path": "./snippets/hexfield.json"
+      }
+    ],
     "languages": [
       {
         "id": "hexfield-markdown",
@@ -113,6 +143,11 @@
           "type": "string",
           "default": "#858585",
           "markdownDescription": "Foreground color for due dates **more than 3 days** in the future."
+        },
+        "hexfield.colors.doneTask": {
+          "type": "string",
+          "default": "#6B737C",
+          "markdownDescription": "Foreground color for completed task lines (`[x]`). Applied with strikethrough."
         }
       }
     }
