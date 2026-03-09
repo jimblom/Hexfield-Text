@@ -1,0 +1,1 @@
+export { ProjectCompletionProvider } from './projectCompletionProvider';

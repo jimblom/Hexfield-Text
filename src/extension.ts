@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DueDateDecorator } from './decorators';
+import { ProjectCompletionProvider } from './completions';
 
 const HEXFIELD_LANGUAGE_ID = 'hexfield-markdown';
 const MARKDOWN_LANGUAGE_ID = 'markdown';
@@ -79,6 +80,14 @@ async function demoteIfNotHexfield(document: vscode.TextDocument): Promise<void>
 export function activate(context: vscode.ExtensionContext): void {
   const decorator = new DueDateDecorator();
   context.subscriptions.push(decorator);
+
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      HEXFIELD_LANGUAGE_ID,
+      new ProjectCompletionProvider(),
+      '#',
+    ),
+  );
 
   // Decorate the active editor immediately if it's already hexfield-markdown
   // (e.g., extension activated after the file was already open and promoted).
