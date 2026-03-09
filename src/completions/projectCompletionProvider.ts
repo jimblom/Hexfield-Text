@@ -10,9 +10,8 @@ const PROJECT_TAG_RE = /(?<!\S)#([a-zA-Z][a-zA-Z0-9_-]*)/g;
 /** Returns project names defined in the hexfield-deck.projects configuration. */
 function getProjectNamesFromConfig(): string[] {
   const projects =
-    vscode.workspace
-      .getConfiguration('hexfield-deck')
-      .get<Record<string, unknown>>('projects') ?? {};
+    vscode.workspace.getConfiguration('hexfield-deck').get<Record<string, unknown>>('projects') ??
+    {};
   return Object.keys(projects);
 }
 
