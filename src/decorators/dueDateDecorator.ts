@@ -83,7 +83,7 @@ const STATIC_PATTERNS: Record<StaticToken, RegExp> = {
   doneTask: /^[ \t]*-[ \t]+\[x\].+/gm,
   // Matches // to end of line. Applied last in decorate() so comment color wins
   // over any other token decorations that fall within the comment range.
-  lineComment: /\/\/.*$/gm,
+  lineComment: /(?<!:)\/\/.*$/gm,
 };
 
 // ---------------------------------------------------------------------------

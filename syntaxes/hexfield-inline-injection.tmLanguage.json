@@ -16,7 +16,7 @@
   "repository": {
     "line-comment": {
       "comment": "Line comment // — green; from // to end of line. Listed first so it wins over all other inline patterns.",
-      "match": "\\/\\/.*$",
+      "match": "(?<!:)\\/\\/.*$",
       "name": "comment.line.double-slash.hexfield"
     },
     "in-progress-checkbox": {
