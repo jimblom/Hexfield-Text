@@ -1,14 +1,6 @@
 import * as vscode from 'vscode';
 
-const DAY_NAMES = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-];
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function toISODate(date: Date): string {
   const y = date.getFullYear();
@@ -34,15 +26,10 @@ export function jumpToTodayCommand(): void {
     if (line.startsWith('#') && (line.includes(todayDayName) || line.includes(todayISO))) {
       const position = new vscode.Position(i, 0);
       editor.selection = new vscode.Selection(position, position);
-      editor.revealRange(
-        new vscode.Range(position, position),
-        vscode.TextEditorRevealType.AtTop,
-      );
+      editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.AtTop);
       return;
     }
   }
 
-  vscode.window.showInformationMessage(
-    `No section found for ${todayDayName} in this file.`,
-  );
+  vscode.window.showInformationMessage(`No section found for ${todayDayName} in this file.`);
 }

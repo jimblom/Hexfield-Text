@@ -104,9 +104,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Promote freshly opened markdown files.
   context.subscriptions.push(
-    vscode.workspace.onDidOpenTextDocument((doc) =>
-      promoteIfHexfield(doc, decorator, statusBar),
-    ),
+    vscode.workspace.onDidOpenTextDocument((doc) => promoteIfHexfield(doc, decorator, statusBar)),
   );
 
   // Debounce timer for re-decorating on content change (500ms, per spec).

@@ -17,7 +17,7 @@ function addDays(date: Date, n: number): Date {
 function nextWeekday(date: Date, targetDay: number): Date {
   const d = new Date(date);
   const current = d.getDay();
-  const diff = ((targetDay - current + 7) % 7) || 7;
+  const diff = (targetDay - current + 7) % 7 || 7;
   d.setDate(d.getDate() + diff);
   return d;
 }

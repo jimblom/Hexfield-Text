@@ -54,10 +54,7 @@ function parseEstimateLabel(value: string, unit: string): string {
 }
 
 export class HexfieldHoverProvider implements vscode.HoverProvider {
-  provideHover(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-  ): vscode.Hover | undefined {
+  provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
     const line = document.lineAt(position.line).text;
     const col = position.character;
 
@@ -74,9 +71,7 @@ export class HexfieldHoverProvider implements vscode.HoverProvider {
     const estRe = /\best:(\d+(?:\.\d+)?)([hm])\b/g;
     while ((m = estRe.exec(line)) !== null) {
       if (col >= m.index && col < m.index + m[0].length) {
-        return new vscode.Hover(
-          new vscode.MarkdownString(parseEstimateLabel(m[1], m[2])),
-        );
+        return new vscode.Hover(new vscode.MarkdownString(parseEstimateLabel(m[1], m[2])));
       }
     }
 

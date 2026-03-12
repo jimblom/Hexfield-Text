@@ -19,10 +19,7 @@ export interface HexfieldSubProvider {
   /** Characters that may trigger this provider's completions. */
   readonly triggerCharacters: readonly string[];
   /** Return matching completion items, or [] if this context isn't relevant. */
-  provideItems(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-  ): vscode.CompletionItem[];
+  provideItems(document: vscode.TextDocument, position: vscode.Position): vscode.CompletionItem[];
 }
 
 /**

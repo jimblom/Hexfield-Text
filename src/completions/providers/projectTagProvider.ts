@@ -40,10 +40,7 @@ export class ProjectTagProvider implements HexfieldSubProvider {
   readonly name = 'projectTag';
   readonly triggerCharacters = ['#'] as const;
 
-  provideItems(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-  ): vscode.CompletionItem[] {
+  provideItems(document: vscode.TextDocument, position: vscode.Position): vscode.CompletionItem[] {
     const lineText = document.lineAt(position).text;
     const textBefore = lineText.slice(0, position.character);
 
