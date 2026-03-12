@@ -20,8 +20,8 @@
       "name": "comment.line.double-slash.hexfield"
     },
     "in-progress-checkbox": {
-      "comment": "In-progress checkbox [/] — orange",
-      "match": "\\[/\\]",
+      "comment": "In-progress checkbox [/] — orange. Lookbehind restricts match to the checkbox position immediately after a list item marker, preventing interference with markdown link detection on the same line.",
+      "match": "(?<=^[ \\t]*[-*+][ \\t]+)\\[/\\]",
       "name": "markup.changed.hexfield.checkbox"
     },
     "due-date": {
