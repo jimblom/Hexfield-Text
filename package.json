@@ -148,6 +148,11 @@
           "type": "string",
           "default": "#6B737C",
           "markdownDescription": "Foreground color for completed task lines (`[x]`). Applied with strikethrough."
+        },
+        "hexfield.colors.lineComment": {
+          "type": "string",
+          "default": "#6A9955",
+          "markdownDescription": "Foreground color for line comments (`// ...`). Matches the C/C++ comment color in VS Code Dark+."
         }
       }
     }

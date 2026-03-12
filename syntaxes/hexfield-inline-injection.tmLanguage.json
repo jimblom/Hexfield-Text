@@ -4,6 +4,7 @@
   "scopeName": "hexfield.markdown.inline",
   "injectionSelector": "L:text.hexfield.markdown - (meta.frontmatter.hexfield)",
   "patterns": [
+    { "include": "#line-comment" },
     { "include": "#in-progress-checkbox" },
     { "include": "#due-date" },
     { "include": "#estimate" },
@@ -13,6 +14,11 @@
     { "include": "#project-tag" }
   ],
   "repository": {
+    "line-comment": {
+      "comment": "Line comment // — green; from // to end of line. Listed first so it wins over all other inline patterns.",
+      "match": "\\/\\/.*$",
+      "name": "comment.line.double-slash.hexfield"
+    },
     "in-progress-checkbox": {
       "comment": "In-progress checkbox [/] — orange",
       "match": "\\[/\\]",

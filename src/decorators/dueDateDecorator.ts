@@ -45,7 +45,8 @@ type StaticToken =
   | 'priorityLow'
   | 'estimate'
   | 'inProgressCheckbox'
-  | 'doneTask';
+  | 'doneTask'
+  | 'lineComment';
 
 const STATIC_DEFAULTS: Record<StaticToken, string> = {
   projectTag: '#569CD6', // Blue
@@ -55,6 +56,7 @@ const STATIC_DEFAULTS: Record<StaticToken, string> = {
   estimate: '#4EC9B0', // Teal
   inProgressCheckbox: '#CE9178', // Orange
   doneTask: '#6B737C', // Muted gray
+  lineComment: '#6A9955', // Comment green (matches C/C++ comment color in VS Code Dark+)
 };
 
 const STATIC_CONFIG_KEYS: Record<StaticToken, string> = {
@@ -65,6 +67,7 @@ const STATIC_CONFIG_KEYS: Record<StaticToken, string> = {
   estimate: 'timeEstimate',
   inProgressCheckbox: 'inProgressCheckbox',
   doneTask: 'doneTask',
+  lineComment: 'lineComment',
 };
 
 /** Each regex must use the global flag so lastIndex can be reset between calls. */
@@ -78,6 +81,9 @@ const STATIC_PATTERNS: Record<StaticToken, RegExp> = {
   // Matches the full content of a done task line (from - [x] to end of line).
   // /gm so ^ anchors to each line start.
   doneTask: /^[ \t]*-[ \t]+\[x\].+/gm,
+  // Matches // to end of line. Applied last in decorate() so comment color wins
+  // over any other token decorations that fall within the comment range.
+  lineComment: /\/\/.*$/gm,
 };
 
 // ---------------------------------------------------------------------------
@@ -198,8 +204,10 @@ function createStaticTypes(): Record<StaticToken, vscode.TextEditorDecorationTyp
   });
 
   // All other static tokens — foreground color only.
+  // lineComment is excluded here; it is applied last in decorate() so its color
+  // wins over any other token decorations that fall within the comment range.
   const simpleTokens = (Object.keys(STATIC_DEFAULTS) as StaticToken[]).filter(
-    (k) => k !== 'projectTag' && k !== 'doneTask',
+    (k) => k !== 'projectTag' && k !== 'doneTask' && k !== 'lineComment',
   );
   for (const token of simpleTokens) {
     result[token] = vscode.window.createTextEditorDecorationType({
@@ -263,9 +271,9 @@ export class DueDateDecorator implements vscode.Disposable {
   decorate(editor: vscode.TextEditor): void {
     const text = editor.document.getText();
 
-    // --- Static tokens (all except projectTag and doneTask, handled below) ---
+    // --- Static tokens (projectTag, doneTask, and lineComment handled separately) ---
     const simpleTokens = (Object.keys(STATIC_PATTERNS) as StaticToken[]).filter(
-      (k) => k !== 'projectTag' && k !== 'doneTask',
+      (k) => k !== 'projectTag' && k !== 'doneTask' && k !== 'lineComment',
     );
     for (const token of simpleTokens) {
       const ranges: vscode.Range[] = [];
@@ -368,6 +376,23 @@ export class DueDateDecorator implements vscode.Disposable {
       editor.setDecorations(this.frontmatterType, fmRanges);
     } else {
       editor.setDecorations(this.frontmatterType, []);
+    }
+
+    // --- Line comments (applied last so comment color wins over any overlapping token) ---
+    {
+      const ranges: vscode.Range[] = [];
+      const re = STATIC_PATTERNS.lineComment;
+      re.lastIndex = 0;
+      let lm: RegExpExecArray | null;
+      while ((lm = re.exec(text)) !== null) {
+        ranges.push(
+          new vscode.Range(
+            editor.document.positionAt(lm.index),
+            editor.document.positionAt(lm.index + lm[0].length),
+          ),
+        );
+      }
+      editor.setDecorations(this.staticTypes.lineComment, ranges);
     }
   }
 
