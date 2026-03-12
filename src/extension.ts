@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { DueDateDecorator } from './decorators';
-import { HexfieldHoverProvider, HexfieldCompletionProvider } from './providers';
+import { HexfieldHoverProvider } from './providers';
+import { HexfieldCompletionService, ProjectTagProvider } from './completions';
 import { insertDateCommand, jumpToTodayCommand } from './commands';
 import { HexfieldStatusBar } from './statusBar';
 
@@ -181,13 +182,18 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.languages.registerHoverProvider(HEXFIELD_SELECTOR, new HexfieldHoverProvider()),
   );
 
+  const completionService = new HexfieldCompletionService([
+    new ProjectTagProvider(),
+    // Future providers — add here when ready:
+    // new EstimateProvider(),
+    // new CheckboxProvider(),
+    // new DateProvider(),
+  ]);
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider(
       HEXFIELD_SELECTOR,
-      new HexfieldCompletionProvider(),
-      '#',
-      ':',
-      '[',
+      completionService,
+      ...completionService.triggerCharacters,
     ),
   );
 
