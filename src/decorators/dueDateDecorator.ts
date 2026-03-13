@@ -10,6 +10,7 @@
 //   Priority LOW  !               → Green  (#89D185)
 //   Time estimate est:2h / est:30m → Teal  (#4EC9B0)
 //   In-progress   [/]             → Orange (#CE9178)
+//   Done task     [x] lines       → Gray   (#6B737C) + strikethrough
 //
 // DYNAMIC tokens — color computed at runtime relative to today:
 //   Due date [YYYY-MM-DD]:
@@ -17,6 +18,9 @@
 //     Today    (date === today)    → Orange (#CE9178)
 //     Soon     (1–3 days from now) → Yellow (#CCA700)
 //     Future   (> 3 days from now) → Gray   (#858585)
+//
+// BLOCK decorations — applied to regions, not inline tokens:
+//   Frontmatter block             → Subtle background tint (whole lines)
 //
 // Using the Decoration API for all tokens ensures colors are absolute and
 // not overridden by the active VS Code theme.
@@ -40,7 +44,9 @@ type StaticToken =
   | 'priorityMed'
   | 'priorityLow'
   | 'estimate'
-  | 'inProgressCheckbox';
+  | 'inProgressCheckbox'
+  | 'doneTask'
+  | 'lineComment';
 
 const STATIC_DEFAULTS: Record<StaticToken, string> = {
   projectTag: '#569CD6', // Blue
@@ -49,6 +55,8 @@ const STATIC_DEFAULTS: Record<StaticToken, string> = {
   priorityLow: '#89D185', // Green
   estimate: '#4EC9B0', // Teal
   inProgressCheckbox: '#CE9178', // Orange
+  doneTask: '#6B737C', // Muted gray
+  lineComment: '#6A9955', // Comment green (matches C/C++ comment color in VS Code Dark+)
 };
 
 const STATIC_CONFIG_KEYS: Record<StaticToken, string> = {
@@ -58,6 +66,8 @@ const STATIC_CONFIG_KEYS: Record<StaticToken, string> = {
   priorityLow: 'priorityLow',
   estimate: 'timeEstimate',
   inProgressCheckbox: 'inProgressCheckbox',
+  doneTask: 'doneTask',
+  lineComment: 'lineComment',
 };
 
 /** Each regex must use the global flag so lastIndex can be reset between calls. */
@@ -68,6 +78,12 @@ const STATIC_PATTERNS: Record<StaticToken, RegExp> = {
   priorityLow: /(?<!!)!(?!!)/g,
   estimate: /\best:\d+(?:\.\d+)?[hm]\b/g,
   inProgressCheckbox: /\[\/\]/g,
+  // Matches the full content of a done task line (from - [x] to end of line).
+  // /gm so ^ anchors to each line start.
+  doneTask: /^[ \t]*-[ \t]+\[x\].+/gm,
+  // Matches // to end of line. Applied last in decorate() so comment color wins
+  // over any other token decorations that fall within the comment range.
+  lineComment: /(?<!:)\/\/.*$/gm,
 };
 
 // ---------------------------------------------------------------------------
@@ -91,6 +107,9 @@ const PROXIMITY_CONFIG_KEYS: Record<Proximity, string> = {
 };
 
 const DATE_BRACKET_RE = /\[(\d{4}-\d{2}-\d{2})\]/g;
+
+/** Matches the YAML frontmatter block at the very start of a file. */
+const FRONTMATTER_BLOCK_RE = /^---\r?\n[\s\S]*?\r?\n---/;
 
 function getProximity(dateStr: string): Proximity {
   const today = new Date();
@@ -152,6 +171,13 @@ function createProjectDecorationType(color: string): vscode.TextEditorDecoration
   });
 }
 
+function createFrontmatterType(): vscode.TextEditorDecorationType {
+  return vscode.window.createTextEditorDecorationType({
+    isWholeLine: true,
+    backgroundColor: 'rgba(198, 134, 192, 0.04)',
+  });
+}
+
 function createStaticTypes(): Record<StaticToken, vscode.TextEditorDecorationType> {
   const cfg = 'hexfield.colors';
 
@@ -170,10 +196,20 @@ function createStaticTypes(): Record<StaticToken, vscode.TextEditorDecorationTyp
     border: `1px solid ${tagBorder}`,
   });
 
+  // Done task gets strikethrough in addition to a muted color.
+  const doneColor = readConfig(cfg, STATIC_CONFIG_KEYS.doneTask, STATIC_DEFAULTS.doneTask);
+  result.doneTask = vscode.window.createTextEditorDecorationType({
+    color: doneColor,
+    textDecoration: 'line-through',
+  });
+
   // All other static tokens — foreground color only.
-  for (const token of Object.keys(STATIC_DEFAULTS).filter(
-    (k) => k !== 'projectTag',
-  ) as StaticToken[]) {
+  // lineComment is excluded here; it is applied last in decorate() so its color
+  // wins over any other token decorations that fall within the comment range.
+  const simpleTokens = (Object.keys(STATIC_DEFAULTS) as StaticToken[]).filter(
+    (k) => k !== 'projectTag' && k !== 'doneTask' && k !== 'lineComment',
+  );
+  for (const token of simpleTokens) {
     result[token] = vscode.window.createTextEditorDecorationType({
       color: readConfig(cfg, STATIC_CONFIG_KEYS[token], STATIC_DEFAULTS[token]),
     });
@@ -209,12 +245,14 @@ function createProximityTypes(): Record<Proximity, vscode.TextEditorDecorationTy
 export class DueDateDecorator implements vscode.Disposable {
   private staticTypes: Record<StaticToken, vscode.TextEditorDecorationType>;
   private proximityTypes: Record<Proximity, vscode.TextEditorDecorationType>;
+  private frontmatterType: vscode.TextEditorDecorationType;
   /** Decoration types keyed by project color — lazily created, disposed on refresh. */
   private projectTypes = new Map<string, vscode.TextEditorDecorationType>();
 
   constructor() {
     this.staticTypes = createStaticTypes();
     this.proximityTypes = createProximityTypes();
+    this.frontmatterType = createFrontmatterType();
   }
 
   /** Rebuild static/proximity decoration types from current hexfield.colors config. */
@@ -222,19 +260,22 @@ export class DueDateDecorator implements vscode.Disposable {
     for (const t of Object.values(this.staticTypes)) t.dispose();
     for (const t of Object.values(this.proximityTypes)) t.dispose();
     for (const t of this.projectTypes.values()) t.dispose();
+    this.frontmatterType.dispose();
     this.projectTypes.clear();
     this.staticTypes = createStaticTypes();
     this.proximityTypes = createProximityTypes();
+    this.frontmatterType = createFrontmatterType();
   }
 
   /** Scan the document and apply all Hexfield token decorations to the editor. */
   decorate(editor: vscode.TextEditor): void {
     const text = editor.document.getText();
 
-    // --- Static tokens (all except projectTag, which is handled below) ---
-    for (const token of (Object.keys(STATIC_PATTERNS) as StaticToken[]).filter(
-      (k) => k !== 'projectTag',
-    )) {
+    // --- Static tokens (projectTag, doneTask, and lineComment handled separately) ---
+    const simpleTokens = (Object.keys(STATIC_PATTERNS) as StaticToken[]).filter(
+      (k) => k !== 'projectTag' && k !== 'doneTask' && k !== 'lineComment',
+    );
+    for (const token of simpleTokens) {
       const ranges: vscode.Range[] = [];
       const re = STATIC_PATTERNS[token];
       re.lastIndex = 0;
@@ -248,6 +289,23 @@ export class DueDateDecorator implements vscode.Disposable {
         );
       }
       editor.setDecorations(this.staticTypes[token], ranges);
+    }
+
+    // --- Done task lines ---
+    {
+      const ranges: vscode.Range[] = [];
+      const re = STATIC_PATTERNS.doneTask;
+      re.lastIndex = 0;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(text)) !== null) {
+        ranges.push(
+          new vscode.Range(
+            editor.document.positionAt(m.index),
+            editor.document.positionAt(m.index + m[0].length),
+          ),
+        );
+      }
+      editor.setDecorations(this.staticTypes.doneTask, ranges);
     }
 
     // --- Project tags ---
@@ -306,6 +364,36 @@ export class DueDateDecorator implements vscode.Disposable {
     for (const prox of Object.keys(proximityRanges) as Proximity[]) {
       editor.setDecorations(this.proximityTypes[prox], proximityRanges[prox]);
     }
+
+    // --- Frontmatter block ---
+    const fmMatch = FRONTMATTER_BLOCK_RE.exec(text);
+    if (fmMatch) {
+      const fmEnd = editor.document.positionAt(fmMatch[0].length);
+      const fmRanges: vscode.Range[] = [];
+      for (let i = 0; i <= fmEnd.line; i++) {
+        fmRanges.push(editor.document.lineAt(i).range);
+      }
+      editor.setDecorations(this.frontmatterType, fmRanges);
+    } else {
+      editor.setDecorations(this.frontmatterType, []);
+    }
+
+    // --- Line comments (applied last so comment color wins over any overlapping token) ---
+    {
+      const ranges: vscode.Range[] = [];
+      const re = STATIC_PATTERNS.lineComment;
+      re.lastIndex = 0;
+      let lm: RegExpExecArray | null;
+      while ((lm = re.exec(text)) !== null) {
+        ranges.push(
+          new vscode.Range(
+            editor.document.positionAt(lm.index),
+            editor.document.positionAt(lm.index + lm[0].length),
+          ),
+        );
+      }
+      editor.setDecorations(this.staticTypes.lineComment, ranges);
+    }
   }
 
   /** Remove all Hexfield decorations from the editor (called on demotion to plain markdown). */
@@ -313,11 +401,13 @@ export class DueDateDecorator implements vscode.Disposable {
     for (const t of Object.values(this.staticTypes)) editor.setDecorations(t, []);
     for (const t of Object.values(this.proximityTypes)) editor.setDecorations(t, []);
     for (const t of this.projectTypes.values()) editor.setDecorations(t, []);
+    editor.setDecorations(this.frontmatterType, []);
   }
 
   dispose(): void {
     for (const t of Object.values(this.staticTypes)) t.dispose();
     for (const t of Object.values(this.proximityTypes)) t.dispose();
     for (const t of this.projectTypes.values()) t.dispose();
+    this.frontmatterType.dispose();
   }
 }

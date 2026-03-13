@@ -1,8 +1,14 @@
 import * as vscode from 'vscode';
 import { DueDateDecorator } from './decorators';
+import { HexfieldHoverProvider } from './providers';
+import { HexfieldCompletionService, ProjectTagProvider } from './completions';
+import { insertDateCommand, jumpToTodayCommand } from './commands';
+import { HexfieldStatusBar } from './statusBar';
 
 const HEXFIELD_LANGUAGE_ID = 'hexfield-markdown';
 const MARKDOWN_LANGUAGE_ID = 'markdown';
+
+const HEXFIELD_SELECTOR: vscode.DocumentSelector = { language: HEXFIELD_LANGUAGE_ID };
 
 /**
  * Matches the YAML frontmatter block at the very start of a file.
@@ -35,11 +41,12 @@ function hasHexfieldFrontmatter(document: vscode.TextDocument): boolean {
 /**
  * Promotes a markdown document to the hexfield-markdown language ID when the
  * file contains `type: hexfield-planner` frontmatter. After promotion, immediately
- * applies due date decorations if the document is visible.
+ * applies due date decorations and updates the status bar if the document is visible.
  */
 async function promoteIfHexfield(
   document: vscode.TextDocument,
   decorator: DueDateDecorator,
+  statusBar: HexfieldStatusBar,
 ): Promise<void> {
   if (document.languageId !== MARKDOWN_LANGUAGE_ID) {
     return;
@@ -49,10 +56,11 @@ async function promoteIfHexfield(
   }
   try {
     const promoted = await vscode.languages.setTextDocumentLanguage(document, HEXFIELD_LANGUAGE_ID);
-    // Apply decorations immediately after promotion so dates are colored on first open.
+    // Apply decorations and status bar immediately after promotion.
     const editor = vscode.window.visibleTextEditors.find((e) => e.document === promoted);
     if (editor) {
       decorator.decorate(editor);
+      statusBar.update(promoted);
     }
   } catch {
     // Document may have been closed or is not promotable — ignore silently.
@@ -78,23 +86,25 @@ async function demoteIfNotHexfield(document: vscode.TextDocument): Promise<void>
 
 export function activate(context: vscode.ExtensionContext): void {
   const decorator = new DueDateDecorator();
-  context.subscriptions.push(decorator);
+  const statusBar = new HexfieldStatusBar();
+  context.subscriptions.push(decorator, statusBar);
 
   // Decorate the active editor immediately if it's already hexfield-markdown
   // (e.g., extension activated after the file was already open and promoted).
   const activeEditor = vscode.window.activeTextEditor;
   if (activeEditor?.document.languageId === HEXFIELD_LANGUAGE_ID) {
     decorator.decorate(activeEditor);
+    statusBar.update(activeEditor.document);
   }
 
   // Process any .md documents already open when the extension activates.
   for (const document of vscode.workspace.textDocuments) {
-    promoteIfHexfield(document, decorator);
+    promoteIfHexfield(document, decorator, statusBar);
   }
 
   // Promote freshly opened markdown files.
   context.subscriptions.push(
-    vscode.workspace.onDidOpenTextDocument((doc) => promoteIfHexfield(doc, decorator)),
+    vscode.workspace.onDidOpenTextDocument((doc) => promoteIfHexfield(doc, decorator, statusBar)),
   );
 
   // Debounce timer for re-decorating on content change (500ms, per spec).
@@ -105,7 +115,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidChangeTextDocument(async (event) => {
       const { document } = event;
       if (document.languageId === MARKDOWN_LANGUAGE_ID) {
-        promoteIfHexfield(document, decorator);
+        promoteIfHexfield(document, decorator, statusBar);
       } else if (document.languageId === HEXFIELD_LANGUAGE_ID) {
         await demoteIfNotHexfield(document);
         const editor = vscode.window.visibleTextEditors.find((e) => e.document === document);
@@ -114,8 +124,12 @@ export function activate(context: vscode.ExtensionContext): void {
           if (document.languageId !== HEXFIELD_LANGUAGE_ID) {
             // Demotion occurred — clear all decorations so no Hexfield colors linger.
             decorator.clear(editor);
+            statusBar.hide();
           } else {
-            debounceTimer = setTimeout(() => decorator.decorate(editor), 500);
+            debounceTimer = setTimeout(() => {
+              decorator.decorate(editor);
+              statusBar.update(document);
+            }, 500);
           }
         }
       }
@@ -126,12 +140,15 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (!editor) {
+        statusBar.hide();
         return;
       }
       if (editor.document.languageId === HEXFIELD_LANGUAGE_ID) {
         decorator.decorate(editor);
+        statusBar.update(editor.document);
       } else {
-        promoteIfHexfield(editor.document, decorator);
+        statusBar.hide();
+        promoteIfHexfield(editor.document, decorator, statusBar);
       }
     }),
   );
@@ -155,6 +172,34 @@ export function activate(context: vscode.ExtensionContext): void {
         }
       }
     }),
+  );
+
+  // --- Language providers ---
+
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(HEXFIELD_SELECTOR, new HexfieldHoverProvider()),
+  );
+
+  const completionService = new HexfieldCompletionService([
+    new ProjectTagProvider(),
+    // Future providers — add here when ready:
+    // new EstimateProvider(),
+    // new CheckboxProvider(),
+    // new DateProvider(),
+  ]);
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      HEXFIELD_SELECTOR,
+      completionService,
+      ...completionService.triggerCharacters,
+    ),
+  );
+
+  // --- Commands ---
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('hexfield.insertDate', insertDateCommand),
+    vscode.commands.registerCommand('hexfield.jumpToToday', jumpToTodayCommand),
   );
 }
 
