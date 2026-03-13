@@ -4,6 +4,41 @@ All notable changes to Hexfield Text are documented here. Dates are in `YYYY-MM-
 
 ---
 
+## [0.2.0] — 2026-03-12
+
+### Added
+
+- **Done-task strikethrough** — `[x]` task lines render with strikethrough text and a muted foreground color. Configurable via `hexfield.colors.doneTask`.
+
+- **Frontmatter block highlight** — the YAML frontmatter block receives a subtle background tint to visually separate it from task content.
+
+- **Line comments** — `// comment text` syntax is now supported inline on any task line. Everything from `//` to end of line renders in comment green (`#6A9955`, matching VS Code Dark+ C/C++ comment color). `://` in URLs is excluded. Configurable via `hexfield.colors.lineComment`.
+
+- **Hover tooltips** — hovering Hexfield tokens shows contextual information:
+  - Due dates — human-readable proximity ("3 days overdue", "Due today", "Due in 5 days — Friday, March 15")
+  - Time estimates — expanded form (`est:90m` → "1h 30m")
+  - Project tags — configured color and URL link (from `hexfield-deck.projects`)
+
+- **Project tag autocomplete** — typing `#` in a Hexfield planner file offers completions from `hexfield-deck.projects` config and tags already present in the document. Partial input is replaced, not appended.
+
+- **`Hexfield: Insert Date` command** — opens a quick-pick with preset options (today, tomorrow, end of week, next Monday, and more) and inserts `[YYYY-MM-DD]` at the cursor. Only available in Hexfield planner files.
+
+- **`Hexfield: Jump to Today` command** — scrolls to the day-section heading matching today's date. Only available in Hexfield planner files.
+
+- **Snippet pack** — seven snippets for `hexfield-markdown` files: `hfm` (frontmatter), `hfd` (day section), `hft` (full task line), `est` (estimate with preset choice list), `phi` / `pme` / `plo` (priority markers).
+
+- **Status bar task summary** — when a Hexfield planner file is active, a summary appears in the right status bar showing overdue date count, in-progress task count, and open task count. Updates within 500ms of edits.
+
+### Fixed
+
+- **Markdown links on `[/]` lines** — `[text](url)` links on the same line as an in-progress checkbox now render correctly. The `[/]` grammar pattern is now anchored to the list item checkbox position via lookbehind, preventing interference with the markdown grammar's link detection.
+
+### Internal
+
+- Introduced `HexfieldCompletionService` provider architecture (`src/completions/`). Completions are implemented as focused `HexfieldSubProvider` classes; the service registers once with VS Code and fans out. Trigger characters are derived automatically from active providers. Supersedes PR #3.
+
+---
+
 ## [0.1.0] — 2026-03-01
 
 Initial public release.
